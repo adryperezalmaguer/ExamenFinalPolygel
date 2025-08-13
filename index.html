@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Examen Final · Curso de Polygel</title>
+<style>
+:root{
+  --bg:#1b0d12;                 /* fondo general oscuro rosado */
+  --bg-grad-1:#1f0f15;          /* gradiente sutil */
+  --bg-grad-2:#14090d;
+  --panel:#1e1418ee;            /* panel oscuro */
+  --accent:#f2b6c1;             /* rosa vieja principal */
+  --accent-2:#e79aa9;           /* variación */
+  --gold:#f6d76b;               /* dorado para títulos y estados */
+  --muted:#c9aeb5;              /* texto secundario acorde a rosados */
+  --text:#f7eef1;               /* texto principal claro */
+  --line:#3a2028;               /* bordes acorde a paleta */
+  --red:#ef4444;                /* rojo para incorrectas y recordatorio */
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;background:radial-gradient(1200px 800px at 10% -10%,var(--bg-grad-1) 0%,var(--bg) 55%,var(--bg-grad-2) 100%), var(--bg);color:var(--text);} 
+.wrap{max-width:960px;margin:40px auto;padding:24px}
+.card{background:linear-gradient(180deg,#1c1116, #150c11);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.35);overflow:hidden}
+header{padding:28px 28px 8px}
+header h1{margin:0;font-size:28px;letter-spacing:.3px;color:var(--gold)}
+header p{margin:10px 0 0;color:var(--muted);line-height:1.6}
+.body{padding:16px 24px 24px}
+
+.grid{display:grid;gap:16px}
+@media (min-width:800px){.grid{grid-template-columns:1fr}}
+
+fieldset{border:1px solid var(--line);padding:16px;border-radius:14px;margin-bottom:16px}
+legend{padding:0 8px;color:var(--accent)}
+
+label{display:block;margin-bottom:10px}
+
+input[type="text"], input[type="email"], input[type="file"], .btn{
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#23131a;
+  color:var(--text);
+}
+/* Borde dorado al enfocar nombre/correo/archivos */
+input[type="text"]:focus, input[type="email"]:focus, input[type="file"]:focus{border-color:var(--gold); outline:none; box-shadow:0 0 0 2px rgba(246,215,107,.25)}
+input[type="text"]:focus-visible, input[type="email"]:focus-visible, input[type="file"]:focus-visible{border-color:var(--gold); outline:none; box-shadow:0 0 0 2px rgba(246,215,107,.25)}
+
+/* Radios dorados y redondos para TODAS las preguntas */
+input[type="radio"]{accent-color: var(--gold);} 
+
+.q{padding:14px 14px 10px;border:1px dashed var(--line);border-radius:12px;margin:12px 0;background:#201218}
+.q h3{margin:0 0 10px;font-size:18px} /* +2px */
+.opt{display:flex;align-items:center;gap:10px;margin:8px 0}
+
+/* Resalta el texto de la opción seleccionada en dorado */
+.opt input:checked + span{color:var(--gold)}
+
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;margin-left:8px}
+.ok{background:rgba(246,215,107,.15); border:1px solid rgba(246,215,107,.45); color:var(--gold)}
+.bad{background:rgba(239,68,68,.15); border:1px solid rgba(239,68,68,.45); color:var(--red)}
+.hidden{display:none !important}
+
+.btn{cursor:pointer;font-weight:600;transition:transform .06s ease, box-shadow .2s ease}
+.btn:hover{transform:translateY(-1px)}
+.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));border:0;color:#290e15}
+.ghost{background:#23131a}
+.pill{font-size:12px;border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:var(--muted)}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.notice{padding:10px 12px;border:1px dashed var(--line);border-radius:12px;background:#201218;color:var(--muted)}
+
+.photo-reminder{font-size:1.1rem; color:var(--red); font-weight:600}
+#scoreBox{margin-top:10px}
+.stack{display:flex;flex-direction:column;gap:10px}
+
+/* Responsivo adicional */
+@media (max-width:560px){
+  header h1{font-size:22px}
+  .wrap{padding:16px}
+  .actions .btn{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <header>
+      <h1>Examen Final · Curso de Polygel</h1>
+      <p><strong>¿Cómo funciona?</strong> Completa tus datos y responde. Con el botón <em>Verificar respuestas</em> podrás ver cuáles marcaste bien o mal y tendrás <strong>3 oportunidades</strong> para corregir. Puedes enviar cuando quieras; si aún estás suspenso y te quedan intentos, el sistema te avisará antes de enviar. <span class="photo-reminder">Recuerda: para enviar, debes adjuntar las 3 fotos.</span></p>
+    </header>
+    <div class="body grid">
+      <section>
+        <form id="examForm" class="stack" novalidate>
+          <fieldset>
+            <legend>Datos del alumno</legend>
+            <label>Nombre completo *
+              <input id="studentName" name="studentName" type="text" required placeholder="Nombre y apellidos" />
+            </label>
+            <label>Correo electrónico *
+              <input id="studentEmail" name="studentEmail" type="email" required placeholder="tucorreo@ejemplo.com" />
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend>Preguntas</legend>
+            <div id="questions"></div>
+          </fieldset>
+          <div class="actions">
+            <button type="button" id="verifyBtn" class="btn ghost">Verificar respuestas</button>
+            <button type="button" id="sendBtn" class="btn primary">Enviar respuestas</button>
+            <span id="attemptsTag" class="pill">Intentos usados: 0 / 3</span>
+            <span id="resultTag" class="pill">Estado: pendiente</span>
+          </div>
+        </form>
+        <div id="scoreBox" class="notice">
+          Correctas: <strong id="okCount">0</strong> · Incorrectas: <strong id="badCount">0</strong>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<dialog id="statusDialog">
+  <form method="dialog" class="stack" style="padding:18px 16px 14px;min-width:320px">
+    <div class="title" id="dlgTitle" style="font-weight:700;font-size:20px">Resultado</div>
+    <div class="desc" id="dlgDesc">—</div>
+    <div class="actions" style="justify-content:flex-end">
+      <button class="btn ghost">Cerrar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/48v2qmovx549t6lex9kgf3fjv0xmfsrb";
+
+// PREGUNTAS DEFINITIVAS
+const QUIZ = [
+  {id:"q1", text:"Marca la ventaja del polygel y la diferencia con el acrílico.", options:[
+    "No tiene olor, es más ligero y cómodo para la clienta. Se diferencia en que el polygel se cura en lámpara y el acrílico al aire libre.",
+    "Tiene un olor fuerte y químicos que puede ocasionar alergias. El polygel es más flexible y el acrílico es más resistentes.",
+    "Más tiempo de aplicación debido al curado en lámpara. El acrílico tiene un aspecto más natural que el polygel."
+  ], correctIndex:0},
+  {id:"q2", text:"Seleccione cuál es la importancia de conocer la anatomía de la uña?", options:[
+    "Conocer la anatomía ayuda a trabajar de forma segura, evitar daños y preparar correctamente la uña para que el producto se adhiera.",
+    "Conocer la anatomía ayuda ampliar el conocimiento, pero no se pone en práctica.",
+    "Conocer la anatomía ayuda a trabajar más rápido, no importa la seguridad ni los daños a la uña al final se ve bonito el trabajo."
+  ], correctIndex:0},
+  {id:"q3", text:"Qué parte debe prepararse bien para evitar el desprendimiento?", options:[
+    "El perigio y resto de cutícula adherida a la placa de la uña.",
+    "Borde libre",
+    "Lúnula"
+  ], correctIndex:0},
+  {id:"q4", text:"Marque las que consideras señales visibles de alergia o dermatitis por contacto.", options:[
+    "Enrojecimiento alrededor de la uña.",
+    "Picazón o ardor en la piel cercana.",
+    "Aparición de pequeñas ampollas.",
+    "Hinchazón"
+  ], multiCorrect:[0,1,2,3]},
+  {id:"q5", text:"Selecciona la opción que explica la diferencia entre el deshidratado y el primer, y cuándo se usa cada uno.", options:[
+    "El deshidratador elimina la humedad y aceites naturales de la uña y el primer crea una capa de adherencia entre la uña y el producto. Primero se aplica el deshidratador. Después el primer, antes de colocar la base de gel o el Polygel",
+    "El deshidratador humecta la uña y el primer es un antihongos. Primero se aplica el primer. Después el deshidratador, antes de colocar la base de gel o el Polygel.",
+    "El deshidratador elimina la humedad y aceites naturales de la uña y el primer crea una capa de adherencia entre la uña y el producto. Solo se debe aplicar primer el deshidratador no es obligatorio"
+  ], correctIndex:0},
+  {id:"q6", text:"Selecciona el orden de pasos para preparar la uña natural.", options:[
+    "Retirar y limpiar la cutícula/perigio, limar suavemente la superficie de la uña natural para retirar el brillo y limpiar con alcohol o limpiador para eliminar polvo y grasa.",
+    "Preparar la uña natural, aplicar deshidratador, aplicar primer y aplicar base de gel, antes de colocar el Polygel.",
+    "Limar suavemente la superficie de la uña natural para retirar el brillo. Retirar y limpiar las cutículas. Limpiar con alcohol o limpiador para eliminar grasa"
+  ], multiCorrect:[0,1]},
+  {id:"q7", text:"Marque que opciones nunca se deben hacer en un servicio de uñas para evitar contaminación y desprendimiento.", options:[
+    "No tocar la uña preparada con los dedos después de limpiarla.",
+    "No aplicar producto sobre piel, cutícula o perigio.",
+    "Usar cualquier producto",
+    "No saber los gustos de la clienta y atenderla como desee yo"
+  ], multiCorrect:[0,1]},
+];
+const PHOTOS_ID = "photos";
+
+let attempts = 0; // máx 3
+let lastPass = false;
+
+const form = document.getElementById('examForm');
+const questionsDiv = document.getElementById('questions');
+const verifyBtn = document.getElementById('verifyBtn');
+const sendBtn = document.getElementById('sendBtn');
+const attemptsTag = document.getElementById('attemptsTag');
+const resultTag = document.getElementById('resultTag');
+const okCountEl = document.getElementById('okCount');
+const badCountEl = document.getElementById('badCount');
+const statusDialog = document.getElementById('statusDialog');
+const dlgTitle = document.getElementById('dlgTitle');
+const dlgDesc = document.getElementById('dlgDesc');
+
+function renderQuestions(){
+  const frag = document.createDocumentFragment();
+  QUIZ.forEach((q, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'q';
+    wrap.id = 'wrap_' + q.id;
+    let opts = '';
+    q.options.forEach((opt, i) => {
+      const id = q.id + '_' + i;
+      // Siempre radio (redondos). Si multiCorrect está definido, consideramos correcta cualquiera de esas.
+      opts += `
+<label class="opt" for="${id}">
+  <input type="radio" name="${q.id}" id="${id}" value="${i}">
+  <span>${opt}</span>
+  <span class="badge hidden" data-badge></span>
+</label>`;
+    });
+    wrap.innerHTML = `<h3>${idx+1}. ${q.text}</h3>${opts}`;
+    frag.appendChild(wrap);
+  });
+  const photoWrap = document.createElement('div');
+  photoWrap.className = 'q';
+  photoWrap.id = 'wrap_' + PHOTOS_ID;
+  photoWrap.innerHTML = `
+<h3>${QUIZ.length+1}. Envía 3 fotos <span class="photo-reminder">(obligatorias para enviar)</span></h3>
+<div class="stack">
+  <label>1. Antes de empezar: organización de tu mesa o espacio de práctica.
+    <input type="file" id="photo1" name="photo1" accept="image/*" required>
+  </label>
+  <label>2. Uña preparada: foto de la uña lista para aplicar el producto (cutícula limpia y preparación terminada).
+    <input type="file" id="photo2" name="photo2" accept="image/*" required>
+  </label>
+  <label>3. Resultado final: uña terminada (puede ser dedo de práctica, tu mano o clienta).
+    <input type="file" id="photo3" name="photo3" accept="image/*" required>
+  </label>
+</div>`;
+  frag.appendChild(photoWrap);
+  questionsDiv.appendChild(frag);
+}
+renderQuestions();
+
+function showDialog(title, desc){
+  dlgTitle.textContent = title;
+  dlgDesc.innerHTML = desc;
+  statusDialog.showModal();
+}
+
+function updateAttemptsUI(){
+  attemptsTag.textContent = 'Intentos usados: ' + attempts + ' / 3';
+}
+
+function getSelections(){
+  // Siempre una selección o ninguna por pregunta (radios)
+  return QUIZ.map(q=>{
+    const sel = form.querySelector('input[name="'+q.id+'"]:checked');
+    return sel ? [parseInt(sel.value,10)] : [];
+  });
+}
+
+function grade(){
+  const selections = getSelections();
+  let ok = 0, bad = 0;
+  QUIZ.forEach((q, idx) => {
+    const wrap = document.getElementById('wrap_'+q.id);
+    wrap.querySelectorAll('[data-badge]').forEach(b=>{ b.classList.add('hidden'); b.textContent=''; b.classList.remove('ok','bad'); });
+    const sel = selections[idx];
+    if(sel.length===0){ return; }
+
+    const choice = sel[0];
+    const isCorrect = Array.isArray(q.multiCorrect)
+      ? q.multiCorrect.includes(choice) // si tiene varias correctas, vale cualquiera
+      : choice === q.correctIndex;
+
+    if(isCorrect) ok++; else bad++;
+
+    const badge = wrap.querySelector('#'+q.id+'_'+choice)?.closest('label')?.querySelector('[data-badge]');
+    if(badge){
+      badge.textContent = isCorrect ? 'Correcta' : 'Incorrecta';
+      badge.classList.add(isCorrect ? 'ok' : 'bad');
+      badge.classList.remove(isCorrect ? 'bad' : 'ok');
+      badge.classList.remove('hidden');
+    }
+  });
+
+  // Las fotos NO afectan al conteo de correctas/incorrectas; solo son obligatorias para enviar
+
+  okCountEl.textContent = ok;
+  badCountEl.textContent = bad;
+  const passes = ok >= (bad + 1);
+  lastPass = passes;
+  resultTag.textContent = 'Estado: ' + (passes ? 'APROBADO (provisional)' : 'PENDIENTE');
+  return {ok,bad,passes};
+}
+
+function requireIdentity(){
+  const name = document.getElementById('studentName');
+  const email = document.getElementById('studentEmail');
+  if(!name.value.trim()) { name.focus(); return false; }
+  if(!email.value.trim() || email.value.indexOf('@')===-1 || email.value.indexOf('.')===-1) { email.focus(); return false; }
+  return {name:name.value.trim(), email:email.value.trim()};
+}
+
+verifyBtn.addEventListener('click', () => {
+  const idOk = requireIdentity();
+  if(!idOk){ showDialog('Datos incompletos', 'Ingresa tu nombre y correo para verificar.'); return; }
+  const r = grade();
+  attempts++; updateAttemptsUI();
+  if(attempts >= 3){ verifyBtn.disabled = true; }
+  const title = r.passes ? '¡Aprobado!' : 'Resultado de verificación';
+  const detail = 'Correctas: '+r.ok+' · Incorrectas: '+r.bad+'<br>Intentos usados: '+attempts+'<br><span style="color:var(--red);font-weight:600">Recuerda: para enviar, debes adjuntar las 3 fotos.</span>';
+  showDialog(title, detail);
+  resultTag.textContent = 'Estado: ' + (r.passes ? 'APROBADO' : 'PENDIENTE');
+});
+
+sendBtn.addEventListener('click', async () => {
+  const idOk = requireIdentity();
+  if(!idOk){ showDialog('Datos incompletos', 'Ingresa tu nombre y correo antes de enviar.'); return; }
+  const f1 = document.getElementById('photo1').files[0];
+  const f2 = document.getElementById('photo2').files[0];
+  const f3 = document.getElementById('photo3').files[0];
+  if(!f1 || !f2 || !f3){ showDialog('Faltan fotos', 'Para completar el envío, debes subir las <strong>3 fotos</strong>.'); return; }
+  const r = grade();
+  if(!r.passes && attempts < 3){
+    const proceed = confirm('Aún estás SUSPENSO y te quedan intentos. Si envías ahora se registrará como DESAPROBADO. ¿Deseas enviar de todos modos?');
+    if(!proceed) return;
+  }
+  const fd = new FormData();
+  fd.append('studentName', idOk.name);
+  fd.append('studentEmail', idOk.email);
+  fd.append('attemptsUsed', String(attempts));
+  fd.append('score_ok', String(r.ok));
+  fd.append('score_bad', String(r.bad));
+  fd.append('passed', String(r.passes));
+  fd.append('qualification', r.passes ? 'APROBADO' : 'DESAPROBADO');
+  fd.append('submittedAt', new Date().toISOString());
+  QUIZ.forEach((q, i) => {
+    const sel = form.querySelector('input[name="'+q.id+'"]:checked');
+    const selected = sel ? [parseInt(sel.value,10)] : [];
+    const isCorrect = selected.length>0 && (Array.isArray(q.multiCorrect) ? q.multiCorrect.includes(selected[0]) : selected[0]===q.correctIndex);
+
+    fd.append('q'+(i+1)+'_question', q.text);
+    fd.append('q'+(i+1)+'_selectedIndices', JSON.stringify(selected));
+    fd.append('q'+(i+1)+'_selectedTexts', JSON.stringify(selected.map(idx=>q.options[idx])));
+    fd.append('q'+(i+1)+'_isCorrect', String(isCorrect));
+  });
+  fd.append('photo1', f1, f1.name);
+  fd.append('photo2', f2, f2.name);
+  fd.append('photo3', f3, f3.name);
+  const oldText = sendBtn.textContent; sendBtn.disabled = true; sendBtn.textContent = 'Enviando…';
+  try{
+    const res = await fetch(MAKE_WEBHOOK_URL, { method: 'POST', body: fd });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    showDialog('¡Felicidades, '+idOk.name+'!','Has completado la prueba final de nuestro curso de Polygel.<br>En los próximos días recibirás a tu correo registrado tu <strong>Certificado de Participación</strong> con tu número secreto.<br><br>Recuerda que este es solo el inicio: sigue practicando, participando en la comunidad y perfeccionando tu técnica.');
+  }catch(e){
+    console.error(e);
+    showDialog('Error al enviar','No pudimos enviar tus respuestas. Intenta nuevamente o contacta a soporte.');
+    sendBtn.disabled = false; sendBtn.textContent = oldText; return;
+  }
+  sendBtn.textContent = oldText;
+});
+</script>
+</body>
+</html>
